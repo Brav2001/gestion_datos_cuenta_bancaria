@@ -1,0 +1,201 @@
+body
+{
+    background: rgb(243,252,255);
+    background: linear-gradient(90deg, rgba(243,252,255,1) 8%, rgba(218,235,237,1) 44%, rgba(174,191,199,1) 92%);
+}
+.pad
+{
+    padding: 0 16px;
+}
+.btn-redonded
+{
+    border-radius: 50% !important;
+}
+.h6-cant
+{
+    margin: 1.168rem 0 1.168rem 0 !important;
+    font-family: monospace;
+    letter-spacing: -2px;
+    word-spacing: -15px;
+}
+h7.h6-cant{
+    letter-spacing: 0px;
+    word-spacing: 0px;
+}
+.card-money 
+{
+    padding: 10px !important;
+}
+.brtc
+{
+    border-radius: 15px !important;
+    -webkit-box-shadow: 10px 10px 16px 4px rgba(0,0,0,0.66);
+    -moz-box-shadow: 10px 10px 16px 4px rgba(0,0,0,0.66);
+    box-shadow: 10px 10px 16px 4px rgba(0,0,0,0.66);
+    z-index: 1;
+}
+.brtc1
+{
+    border-radius: 7px !important;
+    -webkit-box-shadow: 7px 7px 28px 3px rgba(0,0,0,0.42);
+    -moz-box-shadow: 7px 7px 28px 3px rgba(0,0,0,0.42);
+    box-shadow: 7px 7px 28px 3px rgba(0,0,0,0.42);
+    
+}
+.buttonWithShadow{
+    border-radius: 7px !important;
+    -webkit-box-shadow: 3px 3px 9px 0px rgb(0 0 0 / 80%);
+    -moz-box-shadow: 3px 3px 9px 0px rgb(0 0 0 / 80%);
+    box-shadow: 3px 3px 9px 0px rgb(0 0 0 / 80%);
+}
+.deuda-icon
+{
+    font-size: 32px;
+}
+.icon-ad
+{
+    padding: 0!important;
+}
+.mastercard-icon {
+    display: inline-block;
+    height: 1em;
+    isolation: isolate;
+    position: relative;
+    line-height: 1em;
+    vertical-align: middle;
+    width: 1.611em;
+    font-size: 25px;
+}
+.mastercard-icon::before,
+.mastercard-icon::after {
+  border-radius: .5em;
+  content: "";
+  display: inline-block;
+  height: 1em;
+  position: absolute;
+  width: 1em;
+}
+
+.mastercard-icon::before {
+  background-color: #eb001b;
+  left: 0;
+  top: 0;
+}
+
+
+.mastercard-icon::after {
+  background-color: #f79e1b;
+  mix-blend-mode: hard-light;
+  right: 0;
+  top: 0;
+}
+.map-img{
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    opacity: 0.2;
+    z-index: -1;
+}
+.list-icon
+{
+    float: right !important;
+    margin-right: 5px;
+}
+
+    
+thead tr th { 
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background-color: rgb(255, 255, 255);
+}
+@media only screen and (min-height: 670px)
+{
+    .size{
+    max-height: calc(80vh);
+    overflow-y: auto;
+    padding-top: inherit;
+    }
+}
+@media only screen and (max-height: 669px)
+{
+    .size{
+    max-height:  calc(70vh);
+    overflow-y: auto;
+    padding-top: inherit;
+    }
+}
+
+.textShadow
+{
+    text-shadow: 8px 7px 17px rgba(0,0,0,0.45);
+}
+
+.pdf-button{
+    padding: 0px;
+
+}
+
+.pdf-button:hover img {
+    -webkit-transform:scale(1.1);
+    -moz-transform:scale(1.1);
+    -ms-transform:scale(1.1);
+    -o-transform:scale(1.1);
+    transform:scale(1.1);
+}
+.pdf-button:active img{
+    -webkit-transform:scale(0.9);
+    -moz-transform:scale(0.9);
+    -ms-transform:scale(0.9);
+    -o-transform:scale(0.9);
+    transform:scale(0.9);
+}
+
+
+.no-marginBottom{
+    margin-bottom: auto;
+}
+.container-cards {
+    margin: 0 auto;
+    max-width: 1280px;
+    width: 90%;
+}
+@media only screen and (min-width: 993px){
+    .container-cards {
+        width: 85%;
+    }
+}
+@media only screen and (min-width: 601px ) and (max-width:992px){
+    .container-cards {
+        width: 95%;
+    }
+}
+
+.card-gold{
+    background: rgb(205,195,173);
+    background: linear-gradient(148deg, rgba(205,195,173,1) 15%, rgba(160,138,89,1) 44%, rgb(62 50 0) 92%);
+    overflow: hidden;
+    border-radius: 15px!important;
+}
+.card-basic{
+    background: rgb(107,142,163);
+    background: linear-gradient(148deg, rgba(107,142,163,1) 15%, rgba(84,110,122,1) 44%, rgba(41,63,73,1) 92%);
+}
+.money{
+    margin-top: 0px!important;
+}
+.cards-label{
+    font-size: 0.9rem;
+    color: #c7c7c7;
+}
+.creditLabel{
+    font-size: 1.2rem;
+}
+.dataCredit{
+    margin: 0.4rem 0 1.168rem 0 !important;
+    font-family: monospace;
+    letter-spacing: -2px;
+    word-spacing: -15px;
+}

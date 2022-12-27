@@ -1,0 +1,58 @@
+body{
+    caret-color: #ffffff00;
+}
+@media only screen and (min-width: 600px)
+{
+    body
+    {
+        height: 100vh;
+        width: 100vw;
+        margin: 0;;
+        place-items: center;
+        display:flex;
+        justify-content: center;
+        align-content: center;
+        background: rgb(169,229,236);
+        background: linear-gradient(283deg, rgba(169,229,236,1) 4%, rgba(149,183,199,1) 39%, rgba(220,232,237,1) 95%);
+        
+    }
+    .box
+    {
+        width: 500px;
+        padding: 0;
+        margin: 0;
+    }
+    .card-panel{
+        border-radius: 15px;
+        -webkit-box-shadow: 30px 19px 51px 15px rgba(0,0,0,0.61);
+        -moz-box-shadow: 30px 19px 51px 15px rgba(0,0,0,0.61);
+        box-shadow: 30px 19px 51px 15px rgba(0,0,0,0.61);
+    }
+}
+@media only screen and (max-width: 599px)
+{
+    .card-panel{
+        border-radius: 15px;
+        -webkit-box-shadow: 7px 15px 27px 1px rgba(0,0,0,0.66);
+        -moz-box-shadow: 7px 15px 27px 1px rgba(0,0,0,0.66);
+        box-shadow: 7px 15px 27px 1px rgba(0,0,0,0.66);
+    }
+    body{
+        background: rgb(220,232,237);
+background: linear-gradient(90deg, rgba(220,232,237,1) 8%, rgba(169,229,236,1) 44%, rgba(149,183,199,1) 92%);
+
+    }
+}
+.cursor
+{
+    cursor:pointer;
+}
+.ac{
+    color: #26a69a;
+}
+.nac{
+    color: #000;
+}
+input{
+    caret-color: auto;
+}

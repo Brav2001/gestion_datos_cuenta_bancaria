@@ -1,0 +1,124 @@
+body{
+    caret-color: #ffffff00;
+}
+input{
+    caret-color: auto;
+}
+textarea{
+    caret-color: auto;
+}
+input:disabled{
+    caret-color: #ffffff00;
+}
+input[type="date"]{
+    caret-color: auto;
+}
+header, main, footer {
+    padding-left: 300px;
+    
+  }
+  .gooey
+  {
+    left:calc(50% + 150px);
+  }
+
+  @media only screen and (max-width : 992px) {
+    header, main, footer {
+      padding-left: 0;
+      
+    }
+    .gooey{
+        left:50%;
+    }
+}
+
+nav.navbar {
+    z-index: 10;
+    transition: box-shadow .3s, background-color .3s;
+    padding: 0 20px;
+    background-color: #fff;
+    color: rgba(0,0,0,0.87);
+}
+ .logo-container {
+    padding: 0 16px !important;
+    height: 64px !important;
+    line-height: 64px !important;
+    font-size: 24px !important;
+    border-bottom: 1px solid rgba(0,0,0,0.2);
+    box-sizing: content-box;
+}
+.sidenav .logo-container i.material-icons {
+    line-height: inherit;
+}
+.sidenav li>a {
+    color: rgba(0,0,0,0.87);
+    display: block;
+    font-family:Gill Sans, Gill Sans MT, Calibri, sans-serif;
+    font-size: 18px;
+    font-weight: 500;
+    height: 64px;
+    line-height: 64px;
+    padding: 0 16px;
+    
+    box-shadow:none;
+}
+.sidenav .collapsible {
+    border-bottom: 1px solid rgba(0,0,0,0.2);
+}
+.dicon
+{
+    margin: 0 0 0 0 !important;
+    line-height: 64px !important;
+}
+li {
+    line-height: 64px !important;
+}
+main
+{
+    font-family:Gill Sans, Gill Sans MT, Calibri, sans-serif;
+}
+.sidenav .collapsible {
+    border-bottom: 1px solid rgba(0,0,0,0.2);
+    box-shadow: none;
+}
+.sidenav .collapsible>li {
+    border-bottom: 1px solid rgba(0,0,0,0.2);
+    box-shadow: none;
+    
+}
+.sidenav li{
+    box-shadow: none;
+}
+.item-icon{
+    line-height: 64px !important;
+}
+.click
+{
+    cursor: pointer;
+}
+.end
+{
+    border-bottom: 1px solid rgba(0,0,0,0.2) !important;
+}
+.user-view {
+    position: relative;
+    padding: 32px 16px 0!important;
+    font-size: 18px !important;
+    margin-bottom: 0px !important;
+}
+.sidenav .user-view .name, .sidenav .user-view  {
+    font-family:Gill Sans, Gill Sans MT, Calibri, sans-serif;
+    font-size: 20px;
+    line-height: 24px;
+}
+.email
+{
+    font-family:Gill Sans, Gill Sans MT, Calibri, sans-serif;
+    font-size: 18px !important;
+    line-height: 24px;
+}
+.card-icon
+{
+    margin: 0 0 0 0 !important;
+    line-height: 25px !important;
+}
