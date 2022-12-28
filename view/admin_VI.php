@@ -1096,40 +1096,6 @@ class admin_VI
                     <?php
                     if($payment)
                     {
-                        ?>
-                        <div class="col s12 card-panel card-money brtc1">
-                            <h5>Historial de pagos</h5>
-                            <table class="highlight responsive-table">
-                                <thead>
-                                    <tr>
-                                        <td>#Pago</td>
-                                        <td>Fecha</td>
-                                        <td>Valor</td>
-                                        <td>Capital</td>
-                                        <td>Interes</td>
-                                        <td>Mora</td>
-                                    </tr>
-                                </thead>
-                                <tbody class="click">
-                                    <?php
-                                    foreach($payment as $pago)
-                                    {
-                                        ?>
-                                        <tr class="modal-trigger" data-target="modal<?php echo $pago->pay_id ?>">
-                                            <td><?php echo $pago->pay_period?></td>
-                                            <td><?php echo $pago->pay_date?></td>
-                                            <td><?php  echo $fmt->formatCurrency($pago->pay_value_total, "COP");?></td>
-                                            <td><?php  echo $fmt->formatCurrency($pago->pay_value_capital, "COP");?></td>
-                                            <td><?php  echo $fmt->formatCurrency($pago->pay_value_interest, "COP");?></td>
-                                            <td><?php  echo $fmt->formatCurrency($pago->pay_value_arrears, "COP");?></td>
-                                        </tr>
-                                        <?php
-                                    }
-                                    ?>
-                                </tbody>
-                            </table>
-                        </div>
-                        <?php
                         foreach($payment as $pago)
                         {
                             ?>
@@ -1245,8 +1211,14 @@ class admin_VI
             <?php
             if ($write) {
                 $interes=round($int*($result[0]->credit_capital_debt-$result[0]->credit_capital_payd));
-                $capital=$cuota-$interes;
-                $mora=$diff->d*300;
+                if($capital1==0)
+                {
+                    $capital1=$cuotanormal-$interes;
+                }
+                if($interest1==0)
+                {
+                    $interest1=$interes;
+                }
             ?>
                 <div id="modalpago" class="modal brtc1">
                     <div class="modal-content">

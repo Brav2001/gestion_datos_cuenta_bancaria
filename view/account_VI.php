@@ -605,8 +605,10 @@ class account_VI
         $payment_MO=new payment_MO($conexion);
 
         $result = $credit_MO->ConsultCreditActived($_SESSION['pers_id']);
+        
         if($result)
         {
+            $collection = $credit_MO->ConsultCollection($result[0]->credit_id);
             $fmt = new NumberFormatter( 'es_CO', NumberFormatter::CURRENCY );
             $fmt->setTextAttribute(NumberFormatter::CURRENCY_CODE, 'COP');
             $fmt->setAttribute(NumberFormatter::FRACTION_DIGITS, 0);
@@ -618,15 +620,21 @@ class account_VI
             $saldo=$result[0]->credit_capital_debt-$result[0]->credit_capital_payd;
 
             $int=0.02;
-            $cuota=round(($int*($result[0]->credit_capital_debt-$result[0]->credit_capital_payd))/(1-((1+$int)**(-($result[0]->credit_period-$result[0]->credit_period_payd)))));
+            $cuotanormal=round(($int*($result[0]->credit_capital_debt-$result[0]->credit_capital_payd))/(1-((1+$int)**(-($result[0]->credit_period-$result[0]->credit_period_payd)))));
+            $mora=0;
+            $capital=0;
+            $interest=0;
+            $mora1=0;
+            $capital1=0;
+            $interest1=0;
 
-            $diff=$current_day->diff($dateCutEnd);
+            // $diff=$current_day->diff($dateCutEnd);
             
-            if($dateCutEnd>$current_day){
-                $diff->d=0;
-            }
+            // if($dateCutEnd>$current_day){
+            //     $diff->d=0;
+            // } 
 
-            $payd=$cuota+($diff->d*1000);
+            // $payd=$cuota+($diff->d*1000);
             $payment=$payment_MO->consultPayWithCreditId($result[0]->credit_id);
             ?>
             <br>
@@ -651,6 +659,42 @@ class account_VI
                                 <?php
                             }
                             else{
+                                $cuota=0;
+                                foreach($collection as $cobro)
+                                {
+                                    $hoy = strtotime(date('d-m-Y'));
+                                    if(strtotime($cobro->collection_date_first)<=$hoy && strtotime($cobro->collection_date_end)>=$hoy && $cobro->collection_state=="debt")
+                                    {
+                                        $cuota=$cuota+$cobro->collection_debt;
+                                        if($capital==0){
+                                            $capital1=$cobro->collection_debt_capital;
+                                        }
+                                        if($interest==0){
+                                            $interest1=$cobro->collection_debt_interest;
+                                        }
+                                        $capital=$capital+$cobro->collection_debt_capital;
+                                        $interest=$interest+$cobro->collection_debt_interest;
+                                    }
+                                    if(strtotime($cobro->collection_date_end)<$hoy && $cobro->collection_state=="debt")
+                                    {
+                                        if($capital==0){
+                                            $capital1=$cobro->collection_debt_capital;
+                                        }
+                                        if($interest==0){
+                                            $interest1=$cobro->collection_debt_interest;
+                                        }
+                                        
+                                        $cuota=$cuota+$cobro->collection_debt;
+                                        $capital=$capital+$cobro->collection_debt_capital;
+                                        $interest=$interest+$cobro->collection_debt_interest;
+                                        $diff=$current_day->diff(new DateTime($cobro->collection_date_end));
+                                        if($mora==0){
+                                            $mora1=$diff->days;
+                                        }
+                                        $mora=$mora+$diff->days;
+                                    }
+                                }
+                                $payd=$cuota+($mora*300);
                                 ?>
                                 <div class="click card-money card-panel orange darken-3 brtc1 modal-trigger" href="#modalcobro">
                                     <label for="deuda" class="white-text creditLabel">Total a pagar:</label>
@@ -676,11 +720,11 @@ class account_VI
                         </div> -->
                         <div class="col s6 m6">
                             <label for="valorCuota">Valor Cuota:</label>
-                            <h4 id="valorCuota" class="dataCredit"><?php  echo $fmt->formatCurrency($cuota, "COP");?></h4>
+                            <h4 id="valorCuota" class="dataCredit"><?php  echo $fmt->formatCurrency($cuotanormal, "COP");?></h4>
                         </div>
                         <div class="col s6 m6">
                             <label for="cuotasPagadas">Mora:</label>
-                            <h4 id="cuotasPagadas" class="dataCredit"><?php echo $diff->d?> D&iacute;as</h4>
+                            <h4 id="cuotasPagadas" class="dataCredit"><?php echo $mora?> D&iacute;as</h4>
                         </div>
                         <div class="col s12 m6">
                             <label for="fechaCorte">Fecha Corte:</label>
@@ -690,44 +734,10 @@ class account_VI
                     <?php
                     if($payment)
                     {
-                        ?>
-                        <div class="col s12 card-panel card-money brtc1">
-                            <h5>Historial de pagos</h5>
-                            <table class="highlight responsive-table">
-                                <thead>
-                                    <tr>
-                                        <td>#Pago</td>
-                                        <td>Fecha</td>
-                                        <td>Valor</td>
-                                        <td>Capital</td>
-                                        <td>Interes</td>
-                                        <td>Mora</td>
-                                    </tr>
-                                </thead>
-                                <tbody class="click">
-                                    <?php
-                                    foreach($payment as $pago)
-                                    {
-                                        ?>
-                                        <tr class="modal-trigger" data-target="modal<?php echo $pago->pay_id ?>">
-                                            <td><?php echo $pago->pay_period?></td>
-                                            <td><?php echo $pago->pay_date?></td>
-                                            <td><?php  echo $fmt->formatCurrency($pago->pay_value_total, "COP");?></td>
-                                            <td><?php  echo $fmt->formatCurrency($pago->pay_value_capital, "COP");?></td>
-                                            <td><?php  echo $fmt->formatCurrency($pago->pay_value_interest, "COP");?></td>
-                                            <td><?php  echo $fmt->formatCurrency($pago->pay_value_arrears, "COP");?></td>
-                                        </tr>
-                                        <?php
-                                    }
-                                    ?>
-                                </tbody>
-                            </table>
-                        </div>
-                        <?php
                         foreach($payment as $pago)
                         {
                             ?>
-                            <div id="modal<?php echo $pago->pay_id  ?>" class="modal brtc1 modal-fixed-footer">
+                            <div id="modal<?php echo  $result[0]->credit_id;echo $pago->pay_period  ?>" class="modal brtc1 modal-fixed-footer">
                                 <div class="modal-content">
                                     <h5>Informaci&oacuten de pago</h5>
                                     <h6><b>Código pago:</b> <?php echo ($pago->pay_id) ?></h6>
@@ -749,22 +759,74 @@ class account_VI
                             <?php
                         }
                     }
-                    ?> 
+                    ?>
+                    <div class="col s12 card-panel card-money brtc1">
+                        <h5>Historial de pagos</h5>
+                        <h6>
+                            <i class="green-text text-darken-3 tiny material-icons">check_circle</i>Pagado   
+                            <i class="grey-text text-darken-3 tiny material-icons">do_not_disturb_on</i>No cobrado 
+                            <i class="yellow-text text-darken-3 tiny material-icons">radio_button_checked</i>Actual 
+                            <i class="red-text text-darken-3 tiny material-icons">cancel</i>Atrasado 
+                        </h6>
+                        <table class="highlight ">
+                            <thead>
+                                <tr>
+                                    <td class="center">Estado</td>
+                                    <td class="center">Fecha</td>
+                                    <td class="center">Periodo</td>
+                                    <td class="center">Cuota</td>
+                                </tr>
+                            </thead>
+                            <tbody >
+                                <?php
+                                $hoy = strtotime(date('d-m-Y'));
+                                foreach($collection as $cobro)
+                                {
+                                    $trClass='';
+                                    if($cobro->collection_state=="payd")
+                                    {
+                                        $class="green-text text-darken-3";
+                                        $icon="check_circle";
+                                        $trClass="class='click modal-trigger' data-target='modal".$result[0]->credit_id."$cobro->collection_period'";
+                                    }
+                                    if(strtotime($cobro->collection_date_first)>$hoy && $cobro->collection_state=="debt")
+                                    {
+                                        $class="grey-text text-darken-3";
+                                        $icon="do_not_disturb_on";
+                                    }
+                                    if(strtotime($cobro->collection_date_first)<=$hoy && strtotime($cobro->collection_date_end)>=$hoy && $cobro->collection_state=="debt")
+                                    {
+                                        $class="yellow-text text-darken-3";
+                                        $icon="radio_button_checked";
+                                    }
+                                    if(strtotime($cobro->collection_date_end)<$hoy && $cobro->collection_state=="debt")
+                                    {
+                                        $class="red-text text-darken-3";
+                                        $icon="cancel";
+                                    }
+                                    ?>
+                                    <!-- class="modal-trigger" data-target="modal<?php echo $cobro->collection_id ?>" -->
+                                     <tr <?php echo $trClass;?>> 
+                                        <td class="center"><i class="<?php echo $class ?> material-icons"><?php echo $icon ?></i></td>
+                                        <td class="center"><?php echo $cobro->collection_date_first?></td>
+                                        <td class="center"><?php echo $cobro->collection_period?></td>
+                                        <td class="center"><?php  echo $fmt->formatCurrency($cobro->collection_debt, "COP");?></td>
+                                    </tr>
+                                    <?php
+                                }
+                                ?>
+                            </tbody>
+                        </table>
+                    </div> 
                 </div>
             </div>
             <div id="modalcobro" class="modal brtc1">
                 <div class="modal-content">
                     <h5>Factura cobro</h5>
                     <div class="row">
-                        <?php 
-                        $interes=round($int*($result[0]->credit_capital_debt-$result[0]->credit_capital_payd));
-                        $capital=$cuota-$interes;
-                        $mora=$diff->d*500;
-                        $total=$cuota+$mora;
-                        ?>
                         <div class="col s12">
                             <label for="totalcobro">Total:</label>
-                            <h4 id="totalcobro"><?php  echo $fmt->formatCurrency($total, "COP");?></h4>
+                            <h4 id="totalcobro"><?php  echo $fmt->formatCurrency($payd, "COP");?></h4>
                         </div>
                         <div class="col s12">
                             <label for="capitalcobro">Capital:</label>
@@ -772,11 +834,11 @@ class account_VI
                         </div>
                         <div class="col s12">
                             <label for="interescobro">Interes:</label>
-                            <h5 id="interescobro"><?php  echo $fmt->formatCurrency($interes, "COP");?></h5>
+                            <h5 id="interescobro"><?php  echo $fmt->formatCurrency($interest, "COP");?></h5>
                         </div>
                         <div class="col s12">
                             <label for="moracobro">Mora:</label>
-                            <h5 id="moracobro"><?php  echo ($fmt->formatCurrency($mora, "COP")." (".$diff->d." Días)"); ?></h5>
+                            <h5 id="moracobro"><?php  echo ($fmt->formatCurrency($mora*300, "COP")." (".$mora." Días)"); ?></h5>
                         </div>
                     </div>
                 </div>
