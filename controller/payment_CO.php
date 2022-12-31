@@ -93,7 +93,42 @@
                         $upCredit=$credit_MO->updateCreditForPay($credit_id,$credit_capital_payd,$credit_interest_payd,$credit_arrears_collected,$credit_surplus_collected,$credit_period,$credit_period_payd,$credit_date_cut_first,$credit_date_cut_end,date('Y-m-d H:i:s'));
                         if($upCredit)
                         {
-                            $credit_MO->UpdateCreditCollection('payd',date('Y-m-d H:i:s'),$credit_id,$pay_period);
+                            if($aumentar==0)
+                            {
+                                $credit_MO->UpdateCreditCollection('payd',date('Y-m-d H:i:s'),$credit_id,$pay_period);
+                            }
+                            if($aumentar>0)
+                            {
+                                $dataCollection=$credit_MO->ConsultCollectionForIncrease($credit_id,$pay_period);
+                                $credit_MO->UpdateCreditCollectionForIncrease('payd',($dataCollection[0]->collection_debt-$dataCollection[0]->collection_debt_capital),date('Y-m-d H:i:s'),0,$dataCollection[0]->collection_debt_interest,$credit_id,$pay_period);
+                                for($i=0;$i<($credit_period-$pay_period-$aumentar);$i++)
+                                {
+                                    $credit_MO->DeleteCreditCollectionForIncrease($credit_id,($pay_period+$i+1));
+                                }
+                                $firstMonth=$dataCollection[0]->collection_date_first;
+                                $firstMonth=strtotime($firstMonth);
+                                $anio=date("Y",$firstMonth);
+                                $month=date("m",$firstMonth);
+                                $monto=$credit[0]->credit_capital_debt-$credit[0]->credit_capital_payd;
+                                for($i=0;$i<($credit_period-$pay_period);$i++)
+                                {
+                                    $int=0.02;
+                                    $cuota=round(($int*$monto)/(1-((1+$int)**(-(($credit_period-$pay_period)-$i)))));
+                                    $interest=$monto*$int;
+                                    $capital=$cuota-round($interest);
+                                    $monto=$monto-$capital;
+                                    if($month==12)
+                                    {
+                                        $anio=$anio+1;
+                                        $month=1;
+                                    }else{
+                                        $month=$month+1;
+                                    }
+                                    $firsdate=$anio."-".$month."-"."01";
+                                    $firsdatend=$anio."-".$month."-"."10";
+                                    $credit_MO->CreateCollectionCredit($credit_id,($i+1+$pay_period),$firsdate,$firsdatend,'debt',$cuota,date('Y-m-d H:i:s'),$capital,$interest);
+                                }
+                            }
                             if($credit_capital_payd==$credit[0]->credit_capital_debt && $credit_interest_payd==$credit[0]->credit_interest_debt)
                             {
                                 $upCredit=$credit_MO->creditChangeState($credit_id,'payd',date('Y-m-d H:i:s'));

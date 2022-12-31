@@ -78,7 +78,24 @@
             $this->connect->consultar($sql);
             return $this->connect->extraerRegistro();
         }
-
+        function ConsultCollectionForIncrease($credit_id,$period)
+        {
+            $sql="SELECT  `collection_date_first`, `collection_debt`, `collection_debt_capital`, `collection_debt_interest` FROM `collection` WHERE `credit_id`='$credit_id' AND `collection_period`='$period'";
+            $this->connect->consultar($sql);
+            return $this->connect->extraerRegistro();
+        }
+        function UpdateCreditCollectionForIncrease($state,$debt,$date,$capital,$interest,$credit_id,$period)
+        {
+            $sql="UPDATE `collection` SET `collection_state`='$state',`collection_debt`='$debt',`updated_at`='$date',`collection_debt_capital`='$capital',`collection_debt_interest`='$interest' WHERE `credit_id`='$credit_id' AND `collection_period`='$period'";
+            $this->connect->consultar($sql);
+            return $this->connect->extraerRegistro();
+        }
+        function DeleteCreditCollectionForIncrease($credit_id,$period)
+        {
+            $sql="DELETE FROM `collection` WHERE `credit_id`='$credit_id' AND `collection_period`='$period'";
+            $this->connect->consultar($sql);
+            return $this->connect->extraerRegistro();
+        }
     }
 
 ?>

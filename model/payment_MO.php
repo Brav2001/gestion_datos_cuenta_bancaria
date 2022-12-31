@@ -19,5 +19,11 @@
             $this->connect->consultar($sql);
             return $this->connect->extraerRegistro();
         }
+        function consultPayWithCreditIdAndPeriod($credit_id,$period)
+        {
+            $sql="SELECT `pay_value_total` FROM `payment` WHERE `credit_id`='$credit_id' AND `pay_period`='$period';";
+            $this->connect->consultar($sql);
+            return $this->connect->extraerRegistro();
+        }
     }
 ?>

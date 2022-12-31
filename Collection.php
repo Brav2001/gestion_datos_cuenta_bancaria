@@ -45,7 +45,13 @@
             $firstMonth=$credito->credit_date_cut_first;
             $firstMonth=strtotime($firstMonth);
             $anio=date("Y",$firstMonth);
-            $month=date("m",$firstMonth)-$credito->credit_period_payd;
+            $month=date("m",$firstMonth);
+            if($month==1)
+            {
+                $anio=$anio-1;
+                $month=13;
+            }
+            $month=$month-$credito->credit_period_payd;
             for($i=0;$i<$credito->credit_period;$i++)
             {
                 $int=0.02;

@@ -759,6 +759,36 @@ class account_VI
                             <?php
                         }
                     }
+                    foreach($collection as $cobro)
+                    {
+                        $hoy = strtotime(date('d-m-Y'));
+                        $dias=0;
+                        if(strtotime($cobro->collection_date_end)<$hoy && $cobro->collection_state=="debt")
+                        {
+                            $diff=$current_day->diff(new DateTime($cobro->collection_date_end));
+                            $dias=$diff->days;
+                        }
+                        if($cobro->collection_state=="debt")
+                        {
+                            ?>
+                            <div id="modal<?php echo $result[0]->credit_id;echo $cobro->collection_period  ?>" class="modal brtc1 modal-fixed-footer">
+                                <div class="modal-content">
+                                    <h5>Informaci&oacuten de cobro</h5>
+                                    <h6><b>Fecha de cobro:</b> <?php echo $cobro->collection_date_first ?></h6>
+                                    <h6><b>Pago oportuno:</b> antes de  <?php echo $cobro->collection_date_end ?></h6>
+                                    <h6><b>Numero cuota:</b> <?php echo $cobro->collection_period ?></h6>
+                                    <h6><b>Valor total:</b><?php  echo $fmt->formatCurrency((($dias*300)+$cobro->collection_debt), "COP");?></h6>
+                                    <h6><b>Valor capital:</b><?php  echo $fmt->formatCurrency($cobro->collection_debt_capital, "COP");?></h6>
+                                    <h6><b>Valor interes:</b><?php  echo $fmt->formatCurrency($cobro->collection_debt_interest, "COP");?></h6>
+                                    <h6><b>Valor mora:</b><?php  echo $fmt->formatCurrency(($dias*300), "COP");?> (<?php  echo $dias?> Días)</h6>
+                                </div>
+                                <div class="modal-footer">
+                                    <a class="modal-close waves-effect waves-light btn light-blue darken-2 ">Aceptar</a>
+                                </div>
+                            </div>
+                            <?php
+                        }
+                    }
                     ?>
                     <div class="col s12 card-panel card-money brtc1">
                         <h5>Historial de pagos</h5>
@@ -773,8 +803,8 @@ class account_VI
                                 <tr>
                                     <td class="center">Estado</td>
                                     <td class="center">Fecha</td>
-                                    <td class="center">Periodo</td>
                                     <td class="center">Cuota</td>
+                                    <td class="center">Valor</td>
                                 </tr>
                             </thead>
                             <tbody >
@@ -782,12 +812,16 @@ class account_VI
                                 $hoy = strtotime(date('d-m-Y'));
                                 foreach($collection as $cobro)
                                 {
-                                    $trClass='';
+                                    $dias=0;
+                                    $valor=0;
+                                    $trClass="class='click modal-trigger' data-target='modal".$result[0]->credit_id."$cobro->collection_period'";   
                                     if($cobro->collection_state=="payd")
                                     {
                                         $class="green-text text-darken-3";
                                         $icon="check_circle";
                                         $trClass="class='click modal-trigger' data-target='modal".$result[0]->credit_id."$cobro->collection_period'";
+                                        $consult=$payment_MO->consultPayWithCreditIdAndPeriod($credit_id,$cobro->collection_period);
+                                        $valor=$consult[0]->pay_value_total;
                                     }
                                     if(strtotime($cobro->collection_date_first)>$hoy && $cobro->collection_state=="debt")
                                     {
@@ -803,6 +837,12 @@ class account_VI
                                     {
                                         $class="red-text text-darken-3";
                                         $icon="cancel";
+                                        $diff=$current_day->diff(new DateTime($cobro->collection_date_end));
+                                        $dias=$diff->days;
+                                    }
+                                    if($cobro->collection_state=="debt")
+                                    {
+                                        $valor=($dias*300)+$cobro->collection_debt;
                                     }
                                     ?>
                                     <!-- class="modal-trigger" data-target="modal<?php echo $cobro->collection_id ?>" -->
@@ -810,7 +850,7 @@ class account_VI
                                         <td class="center"><i class="<?php echo $class ?> material-icons"><?php echo $icon ?></i></td>
                                         <td class="center"><?php echo $cobro->collection_date_first?></td>
                                         <td class="center"><?php echo $cobro->collection_period?></td>
-                                        <td class="center"><?php  echo $fmt->formatCurrency($cobro->collection_debt, "COP");?></td>
+                                        <td class="center"><?php  echo $fmt->formatCurrency($valor, "COP");?></td>
                                     </tr>
                                     <?php
                                 }
