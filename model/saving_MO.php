@@ -28,5 +28,11 @@
             $this->connect->consultar($sql);
             return $this->connect->extraerRegistro();
         }
+        function consultValueLastMonth($pers_id,$saving_month)
+        {
+            $sql="SELECT `sato_value_month` FROM `saving_total` WHERE `pers_id`='$pers_id' AND `sato_month`='$saving_month'; ";
+            $this->connect->consultar($sql);
+            return $this->connect->extraerRegistro();
+        }
     }
 ?>

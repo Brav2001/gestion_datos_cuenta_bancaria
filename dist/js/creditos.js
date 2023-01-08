@@ -143,7 +143,6 @@ function continuar(id)
         .then(res=>{
           if(res.estado=="EXITO")
           {
-            alert(res.credit_id)
             Swal.fire({
               icon:'success',
               title: 'Crédito activado',

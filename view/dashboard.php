@@ -24,8 +24,8 @@ class dashboard
 
         $name = $person_MO->consultName($_SESSION['pers_id']);
         $current_day = new DateTime("now");
-        $last_day = $savingtotal_MO->month($_SESSION['pers_id']);
-        $last_day = new DateTime($last_day[0]->sato_month);
+        $consult_last_day = $savingtotal_MO->month($_SESSION['pers_id']);
+        $last_day = new DateTime($consult_last_day[0]->sato_month);
         $diff = $current_day->diff($last_day);
         if ($current_day < $last_day) {
             $diff->m = 0;
@@ -168,7 +168,7 @@ class dashboard
                                         </div>
                                         <div class="col s10 right-align">
                                             <label class="cards-label" for="ahorro">Total ahorro:</label>
-                                            <h3 id="ahorro" class="h6-cant"><?php
+                                            <h3 id="ahorro" class="h6-cant-card"><?php
                                             $fmt->setTextAttribute(NumberFormatter::CURRENCY_CODE, 'COP');
                                             $fmt->setAttribute(NumberFormatter::FRACTION_DIGITS, 0);
                                             echo $fmt->formatCurrency($card[0]->sato_value, "COP");?></h3>
@@ -176,12 +176,19 @@ class dashboard
                                     </div>
                                     <div class="left-align">
                                         <label class="cards-label" for="ult">Ultimo aporte:</label>
-                                        <h5 id="ult" class="h6-cant"><?php echo ($card[0]->updated_at) ?>
-                                            <?php if ($diff->m > 0) {
+                                        <h5 id="ult" class="h6-cant-card"><?php echo ($card[0]->updated_at) ?>
+                                            <?php if ($diff->m > 0 ) {
                                             ?>
                                                 <i class="deuda-icon material-icons right">error</i>
                                             <?php
-                                            } else {
+                                            }
+                                            if($consult_last_day[0]->sato_value_month<15000 &&  $current_day >= $last_day)
+                                            {
+                                                ?>
+                                                <i class="deuda-icon material-icons right">error</i>
+                                                <?php
+                                            } 
+                                            else {
                                             ?>
                                                 <i class="deuda-icon material-icons right">check_circle</i>
                                             <?php
@@ -218,7 +225,7 @@ class dashboard
                                             </div>
                                             <div class="col s10 right-align">
                                                 <label class="cards-label" for="ahorro">Saldo:</label>
-                                                <h3 id="ahorro" class="h6-cant"><?php
+                                                <h3 id="ahorro" class="h6-cant-card"><?php
                                                 $fmt->setTextAttribute(NumberFormatter::CURRENCY_CODE, 'COP');
                                                 $fmt->setAttribute(NumberFormatter::FRACTION_DIGITS, 0);
                                                 echo $fmt->formatCurrency($saldo, "COP");?></h3>
@@ -226,7 +233,7 @@ class dashboard
                                         </div>
                                         <div class="left-align">
                                             <label class="cards-label" for="ult">Fecha de corte:</label>
-                                            <h5 id="ult" class="h6-cant"><?php echo ($credit[0]->credit_date_cut_first) ?>
+                                            <h5 id="ult" class="h6-cant-card"><?php echo ($credit[0]->credit_date_cut_first) ?>
                                                 <?php if ($dateCut>$current_day) {
                                                 ?>
                                                     <i class="deuda-icon material-icons right">check_circle</i>

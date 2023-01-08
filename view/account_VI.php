@@ -25,8 +25,8 @@ class account_VI
 
 
             $current_day = new DateTime("now");
-            $last_day = $savingtotal_MO->month($_SESSION['pers_id']);
-            $last_day = new DateTime($last_day[0]->sato_month);
+            $consult_last_day = $savingtotal_MO->month($_SESSION['pers_id']);
+            $last_day = new DateTime($consult_last_day[0]->sato_month);
             $diff = $current_day->diff($last_day);
             if ($current_day < $last_day) {
                 $diff->m = 0;
@@ -60,7 +60,7 @@ class account_VI
                                         </div>
                                         <div class="col s10 right-align">
                                             <label class="cards-label" for="ahorro">Total ahorro:</label>
-                                            <h3 id="ahorro" class="h6-cant"><?php
+                                            <h3 id="ahorro" class="h6-cant-card"><?php
                                             $fmt->setTextAttribute(NumberFormatter::CURRENCY_CODE, 'COP');
                                             $fmt->setAttribute(NumberFormatter::FRACTION_DIGITS, 0);
                                             echo $fmt->formatCurrency($card[0]->sato_value, "COP");?></h3>
@@ -68,12 +68,19 @@ class account_VI
                                     </div>
                                     <div class="left-align">
                                         <label class="cards-label" for="ult">Ultimo aporte:</label>
-                                        <h5 id="ult" class="h6-cant"><?php echo ($card[0]->updated_at) ?>
+                                        <h5 id="ult" class="h6-cant-card"><?php echo ($card[0]->updated_at) ?>
                                             <?php if ($diff->m > 0) {
                                             ?>
                                                 <i class="deuda-icon material-icons right">error</i>
                                             <?php
-                                            } else {
+                                            }
+                                            if($consult_last_day[0]->sato_value_month<15000 &&  $current_day >= $last_day)
+                                            {
+                                                ?>
+                                                <i class="deuda-icon material-icons right">error</i>
+                                                <?php
+                                            }  
+                                            else {
                                             ?>
                                                 <i class="deuda-icon material-icons right">check_circle</i>
                                             <?php
@@ -110,7 +117,7 @@ class account_VI
                                             </div>
                                             <div class="col s10 right-align">
                                                 <label class="cards-label" for="ahorro">Saldo:</label>
-                                                <h3 id="ahorro" class="h6-cant"><?php
+                                                <h3 id="ahorro" class="h6-cant-card"><?php
                                                 $fmt->setTextAttribute(NumberFormatter::CURRENCY_CODE, 'COP');
                                                 $fmt->setAttribute(NumberFormatter::FRACTION_DIGITS, 0);
                                                 echo $fmt->formatCurrency($saldo, "COP");?></h3>
@@ -118,7 +125,7 @@ class account_VI
                                         </div>
                                         <div class="left-align">
                                             <label class="cards-label" for="ult">Fecha de corte:</label>
-                                            <h5 id="ult" class="h6-cant"><?php echo ($credit[0]->credit_date_cut_first) ?>
+                                            <h5 id="ult" class="h6-cant-card"><?php echo ($credit[0]->credit_date_cut_first) ?>
                                                 <?php if ($dateCut>$current_day) {
                                                 ?>
                                                     <i class="deuda-icon material-icons right">check_circle</i>
@@ -167,6 +174,19 @@ class account_VI
             if ($current_day < $last_day) {
                 $diff->m = 0;
             }
+            $month = $savingtotal_MO->month($_SESSION['pers_id']);
+            $value_month=$month[0]->sato_value_month;
+            $month = strtotime($month[0]->sato_month);
+            $year = date('Y', $month);
+            $mont = date('m', $month);
+            if($year==2022)
+            {
+                $value_month=0;
+            }
+            if($year==2023 && $value_month==15000)
+            {
+                $value_month=0;
+            }
 
             $listcant = 0;
             $fmt = new NumberFormatter( 'es_CO', NumberFormatter::CURRENCY );
@@ -193,15 +213,28 @@ class account_VI
 
                             <?php
                             if ($diff->m > 0) {
-                                $debt = $diff->m * 10000;
-
+                                $debt = $diff->m * 15000;
+                                if($value_month)
+                                {
+                                    $debt=$debt+(15000-$value_month);
+                                }
                             ?>
                                 <div class="card-money card-panel orange darken-3 brtc1">
                                     <label for="deuda" class="white-text">Total deuda:</label>
                                     <h3 id="deuda" class="h6-cant white-text"><?php  echo $fmt->formatCurrency($debt, "COP");?></h3>
                                 </div>
                             <?php
-                            } else {
+                            } 
+                            else if($value_month && $current_day >= $last_day){
+                                $debt=(15000-$value_month);
+                                ?>
+                                    <div class="card-money card-panel orange darken-3 brtc1">
+                                        <label for="deuda" class="white-text">Total deuda:</label>
+                                        <h3 id="deuda" class="h6-cant white-text"><?php echo $fmt->formatCurrency($debt, "COP") ?></h3>
+                                    </div>
+                                <?php
+                            } 
+                            else {
                             ?>
                                 <div class="card-money card-panel teal brtc1">
                                     <h7 id="deuda" class="h6-cant white-text card-icon"><i class="material-icons card-icon left">check_circle</i>No hay deudas pendientes</h7>
@@ -223,6 +256,7 @@ class account_VI
                                 </thead>
                                 <tbody class="click">
                                     <?php
+                                    $printed=array(0=>'mes');
                                     foreach ($list as $saving) {
                                         $valor = $saving->saving_value;
                                         $fecha = $saving->saving_date;
@@ -267,6 +301,22 @@ class account_VI
                                                 $mes = "Diciembre";
                                                 break;
                                         }
+                                        $search=$mes." ".$ano;
+                                        if(in_array($search, $printed))
+                                        {
+                                            continue;
+                                        }
+                                        array_push($printed, $search);
+                                        if($ano=='2023' && $valor<15000)
+                                        {
+                                            foreach ($list as $saving2)
+                                            {
+                                                $fechaPago2 = $saving2->saving_month;
+                                                if(($fechaPago===$fechaPago2)&&($saving2->saving_id!=$saving->saving_id)){
+                                                    $valor=$valor+$saving2->saving_value;
+                                                }
+                                            }
+                                        }
                                     ?>
                                         <tr class="modal-trigger" data-target="modal<?php echo ($listcant) ?>">
                                             <td><?php echo ($mes) ?> <?php echo ($ano) ?></td>
@@ -289,6 +339,7 @@ class account_VI
 
                     <?php
                     $listcant = 0;
+                    $printed=array(0=>'mes');
                     foreach ($list as $saving) {
                         $codigo = $saving->saving_id;
                         $valor = $saving->saving_value;
@@ -336,6 +387,97 @@ class account_VI
                             case '12':
                                 $mes = "Diciembre";
                                 break;
+                        }
+                        $search=$mes." ".$ano;
+                        if(in_array($search, $printed))
+                        {
+                            continue;
+                        }
+                        array_push($printed, $search);
+                        if($ano=='2023' && $valor<15000)
+                        {
+                            $modal="<div id='modal".$listcant."' class='modal brtc1'>
+                                    <div class='modal-content'>
+                                        <h5>Informaci&oacuten de aporte (Este aporte contiene pagos parciales)</h5>
+                                        <hr size='2px' color='black' />
+                                        <h6><b>Código:</b> ".$codigo."</h6>
+                                        <h6><b>Aportado por:</b> ".$data[0]->pers_name." ".$data[0]->pers_lastname."</h6>
+                                        <h6><b>Mes pagado:</b> ".$mes." ".$ano."</h6>
+                                        <h6><b>Valor:</b> ".$fmt->formatCurrency($valor, "COP")."</h6>
+                                        <h6><b>Descripci&oacuten:</b> ".$descripcion."</h6>
+                                        <h6><b>Fecha:</b> ".$fecha."</h6>
+                                        <h6><b>Registrado por:</b> ".$registrador."</h6>
+                                        <h6><b>Recibido por:</b> ".$treasur."</h6>
+                                        <hr size='2px' color='black' />";
+                            foreach ($list as $saving2)
+                            {
+                                $fechaPago2 = $saving2->saving_month;
+                                if(($fechaPago===$fechaPago2)&&($saving2->saving_id!=$saving->saving_id)){
+                                    $codigo = $saving2->saving_id;
+                                    $valor = $saving2->saving_value;
+                                    $fecha = $saving2->saving_date;
+                                    $descripcion = $saving2->saving_description;
+                                    $registrador = $saving2->saving_register;
+                                    $treasur = $saving2->saving_treasur;
+                                    $fechaPago = $saving2->saving_month;
+                                    $ano = substr($fechaPago, 0, 4);
+                                    $mes = substr($fechaPago, 5, 2);
+                                    switch ($mes) {
+                                        case '01':
+                                            $mes = "Enero";
+                                            break;
+                                        case '02':
+                                            $mes = "Febrero";
+                                            break;
+                                        case '03':
+                                            $mes = "Marzo";
+                                            break;
+                                        case '04':
+                                            $mes = "Abril";
+                                            break;
+                                        case '05':
+                                            $mes = "Mayo";
+                                            break;
+                                        case '06':
+                                            $mes = "Junio";
+                                            break;
+                                        case '07':
+                                            $mes = "Julio";
+                                            break;
+                                        case '08':
+                                            $mes = "Agosto";
+                                            break;
+                                        case '09':
+                                            $mes = "Septimebre";
+                                            break;
+                                        case '10':
+                                            $mes = "Octubre";
+                                            break;
+                                        case '11':
+                                            $mes = "Noviembre";
+                                            break;
+                                        case '12':
+                                            $mes = "Diciembre";
+                                            break;
+                                    }
+                                    $modal=$modal."<h6><b>Código:</b> ".$codigo."</h6>
+                                    <h6><b>Aportado por:</b> ".$data[0]->pers_name." ".$data[0]->pers_lastname."</h6>
+                                    <h6><b>Mes pagado:</b> ".$mes." ".$ano."</h6>
+                                    <h6><b>Valor:</b> ".$fmt->formatCurrency($valor, "COP")."</h6>
+                                    <h6><b>Descripci&oacuten:</b> ".$descripcion."</h6>
+                                    <h6><b>Fecha:</b> ".$fecha."</h6>
+                                    <h6><b>Registrado por:</b> ".$registrador."</h6>
+                                    <h6><b>Recibido por:</b> ".$treasur."</h6>
+                                    <hr size='2px' color='black' />";
+                                }
+                            }
+                            $modal=$modal."</div>
+                            <div class='modal-footer'>
+                                <a class='modal-close waves-effect waves-light btn light-blue darken-2 '>Aceptar</a>
+                            </div>
+                        </div>";
+                        echo $modal;
+                        continue;
                         }
                     ?>
                         <div id="modal<?php echo ($listcant) ?>" class="modal brtc1">
@@ -820,7 +962,7 @@ class account_VI
                                         $class="green-text text-darken-3";
                                         $icon="check_circle";
                                         $trClass="class='click modal-trigger' data-target='modal".$result[0]->credit_id."$cobro->collection_period'";
-                                        $consult=$payment_MO->consultPayWithCreditIdAndPeriod($credit_id,$cobro->collection_period);
+                                        $consult=$payment_MO->consultPayWithCreditIdAndPeriod($result[0]->credit_id,$cobro->collection_period);
                                         $valor=$consult[0]->pay_value_total;
                                     }
                                     if(strtotime($cobro->collection_date_first)>$hoy && $cobro->collection_state=="debt")

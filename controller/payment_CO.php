@@ -51,6 +51,48 @@
                     $pay=$payment_MO->addPay($credit_id,$pay_value_total,$capital,$interes,$mora,$excedente,date('Y-m-d H:i:s'),$pay_period,$register,$treasur);
                     if($pay)
                     {
+                        require_once 'model/interest_MO.php';
+                        require_once 'model/return_MO.php';
+                        require_once 'model/assembly_MO.php';
+                        require_once 'model/fund_MO.php';
+                        require_once 'model/donations_MO.php';
+
+                        $interest_MO=new interest_MO($conexion);
+                        $return_MO=new return_MO($conexion);
+                        $assembly_MO=new assembly_MO($conexion);
+                        $fund_MO=new fund_MO($conexion);
+                        $donations_MO=new donations_MO($conexion);
+
+                        $currentDay=strtotime(date('Y-m-d'));
+                        $year=date('Y',$currentDay);
+                        $existsInterest=$interest_MO->consultInterestWhitYear($year);
+
+                        if(!$existsInterest)
+                        {
+                            $value=$interes+$mora;
+
+                            $interest_MO->createInteres($interes,$mora,$year,date('Y-m-d'));
+                            $return_MO->createReturn(($value*0.5),$year,date('Y-m-d'));
+                            $assembly_MO->createAssembly(($value*0.3),$year,date('Y-m-d'));
+                            $fund_MO->createFund(($value*0.2),'Ingreso del 20% de los interes','i',$year,date('Y-m-d'));
+                            $donations_MO->createDonations($excedente,$year,date('Y-m-d'));
+                        }
+                        else
+                        {
+                            $value_interest=$existsInterest[0]->interest_value_interest+$interes;
+                            $value_mora=$existsInterest[0]->interest_value_arrears+$mora;
+                            $value_total=$value_interest+$value_mora;
+
+                            $interest_MO->updateInteresWhitYear($value_interest,$value_mora,$year,date('Y-m-d'));
+                            $return_MO->updateReturnWhitYear(($value_total*0.5),$year,date('Y-m-d'));
+                            $assembly_MO->updateAssemblyWhitYear(($value_total*0.3),$year,date('Y-m-d'));
+                            $fund_MO->updateFundWhitYear(($value_total*0.2),$year,date('Y-m-d'));
+
+                            $value_excedente=$donations_MO->consultDonationsWhitYearForCredits($year);
+                            $donations_MO->updateDonationsWhitYearForCredits(($value_excedente[0]->donations_value+$excedente),$year,date('Y-m-d'));
+                        }
+
+
                         $credit_MO=new credit_MO($conexion);
 
                         $credit_capital_payd=$credit[0]->credit_capital_payd+$capital;

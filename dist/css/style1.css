@@ -11,9 +11,20 @@ body
 {
     border-radius: 50% !important;
 }
-.h6-cant
+.h6-cant-card
 {
     margin: 1.168rem 0 1.168rem 0 !important;
+    font-family: monospace;
+    letter-spacing: -2px;
+    word-spacing: -15px;
+}
+.card-wallet
+{
+    margin: 0.5rem 0 0.25rem 0 !important;
+}
+.h6-cant
+{
+    margin: 0.55rem 0 0 0 !important;
     font-family: monospace;
     letter-spacing: -2px;
     word-spacing: -15px;
@@ -198,4 +209,7 @@ thead tr th {
     font-family: monospace;
     letter-spacing: -2px;
     word-spacing: -15px;
+}
+.hidden {
+    display: none;
 }

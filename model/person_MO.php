@@ -49,5 +49,17 @@
             $this->connect->consultar($sql);
             return $this->connect->extraerRegistro();
         }
+        function listPersonName()
+        {
+            $sql="SELECT `pers_name`, `pers_lastname`FROM `person` ORDER BY `pers_id`;";
+            $this->connect->consultar($sql);
+            return $this->connect->extraerRegistro();
+        }
+        function listPersonId() 
+        {
+            $sql="SELECT `pers_id` FROM `person` ORDER BY `pers_id`;";
+            $this->connect->consultar($sql);
+            return $this->connect->extraerRegistro();
+        }
     }
 ?>

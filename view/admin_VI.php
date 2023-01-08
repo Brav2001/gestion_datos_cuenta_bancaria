@@ -121,15 +121,20 @@ class admin_VI
                             <tbody class="click ">
                                 <?php
                                 foreach ($listPerson as $person) {
-                                    $last_day = $savingtotal_MO->month($person->pers_id);
-                                    $last_day = new DateTime($last_day[0]->sato_month);
+                                    $consult_last_day = $savingtotal_MO->month($person->pers_id);
+                                    $last_day = new DateTime($consult_last_day[0]->sato_month);
                                     $diff = $current_day->diff($last_day);
                                     if ($current_day < $last_day) {
                                         $diff->m = 0;
                                     }
                                     $icon = 'check_circle';
                                     $class = 'green-text  text-darken-3';
-                                    if ($diff->m > 0) {
+                                    if ($diff->m > 0 ) {
+                                        $icon = 'error';
+                                        $class = 'orange-text text-darken-3';
+                                    }
+                                    if($consult_last_day[0]->sato_value_month<15000 &&  $current_day >= $last_day)
+                                    {
                                         $icon = 'error';
                                         $class = 'orange-text text-darken-3';
                                     }
@@ -202,18 +207,36 @@ class admin_VI
             }
 
             $month = $savingtotal_MO->month($pers_id);
+            $value_month=$month[0]->sato_value_month;
             $month = strtotime($month[0]->sato_month);
             $year = date('Y', $month);
             $mont = date('m', $month);
-            if ($mont == 12) {
-                $year = $year + 1;
-                $mont = 01;
-            } else {
-                $mont = $mont + 1;
+            if($year==2022)
+            {
+                if ($mont == 12) {
+                    $year = $year + 1;
+                    $mont = 01;
+                } else {
+                    $mont = $mont + 1;
+                }
+                $value_month=0;
+            }
+            if($year==2023 && $value_month==15000)
+            {
+                if ($mont == 12) {
+                    $year = $year + 1;
+                    $mont = 01;
+                } else {
+                    $mont = $mont + 1;
+                }
+                $value_month=0;
             }
 
 
             $listcant = 0;
+            $fmt = new NumberFormatter( 'es_CO', NumberFormatter::CURRENCY );
+            $fmt->setTextAttribute(NumberFormatter::CURRENCY_CODE, 'COP');
+            $fmt->setAttribute(NumberFormatter::FRACTION_DIGITS, 0);
         ?>
             <br>
             <div class="col s12 pad">
@@ -241,19 +264,34 @@ class admin_VI
                         <div class="right-align">
                             <div class="card-money card-panel light-blue darken-3 brtc1 ">
                                 <label for="ahorro" class="white-text">Total ahorro:</label>
-                                <h3 id="ahorro" class="h6-cant white-text ">$ <?php echo ($savingTotal[0]->sato_value) ?></h3>
+                                <h3 id="ahorro" class="h6-cant white-text "><?php echo $fmt->formatCurrency($savingTotal[0]->sato_value, "COP") ?></h3>
                             </div>
 
                             <?php
                             if ($diff->m > 0) {
-                                $debt = $diff->m * 10000;
+                                $debt = ($diff->m * 15000);
+                                if($value_month)
+                                {
+                                    $debt=$debt+(15000-$value_month);
+                                }
+
                             ?>
                                 <div class="card-money card-panel orange darken-3 brtc1">
                                     <label for="deuda" class="white-text">Total deuda:</label>
-                                    <h3 id="deuda" class="h6-cant white-text">$ <?php echo ($debt) ?></h3>
+                                    <h3 id="deuda" class="h6-cant white-text"><?php echo $fmt->formatCurrency($debt, "COP") ?></h3>
                                 </div>
                             <?php
-                            } else {
+                            }
+                            else if($value_month && $current_day >= $last_day){
+                                $debt=(15000-$value_month);
+                                ?>
+                                    <div class="card-money card-panel orange darken-3 brtc1">
+                                        <label for="deuda" class="white-text">Total deuda:</label>
+                                        <h3 id="deuda" class="h6-cant white-text"><?php echo $fmt->formatCurrency($debt, "COP") ?></h3>
+                                    </div>
+                                <?php
+                            } 
+                            else {
                             ?>
                                 <div class="card-money card-panel teal brtc1">
                                     <h7 id="deuda" class="h6-cant white-text card-icon"><i class="material-icons card-icon left">check_circle</i>No hay deudas pendientes</h7>
@@ -273,7 +311,7 @@ class admin_VI
                                 <form id="formpagoabono">
                                     <div class="row">
                                         <div class="input-field col s4">
-                                            <input id="valor" name="valor" type="number" value="10000" min="10000" max="100000" class="validate" required>
+                                            <input id="valor" name="valor" type="number" value="<?php echo(15000-$value_month)?>" min="100" max="<?php echo(15000-$value_month)?>" class="validate" step="50" required>
                                             <label for="valor" class=" active ">Valor:</label>
                                         </div>
                                     </div>
@@ -286,10 +324,7 @@ class admin_VI
                                     </div>
                                     <div class="row">
                                         <div class="input-field col s6">
-                                            <select id="ano" name="ano">
-                                                <option value="2021" <?php if ($year == 2021) {
-                                                                            echo ('selected');
-                                                                        } ?>>2021</option>
+                                            <select id="ano" name="ano" disabled>
                                                 <option value="2022" <?php if ($year == 2022) {
                                                                             echo ('selected');
                                                                         } ?>>2022</option>
@@ -302,11 +337,14 @@ class admin_VI
                                                 <option value="2025" <?php if ($year == 2025) {
                                                                             echo ('selected');
                                                                         } ?>>2025</option>
+                                                <option value="2026" <?php if ($year == 2026) {
+                                                                            echo ('selected');
+                                                                        } ?>>2026</option>
                                             </select>
                                             <label>A&ntilde;o:</label>
                                         </div>
                                         <div class="input-field col s6">
-                                            <select id="mes" name="mes">
+                                            <select id="mes" name="mes" disabled>
                                                 <option value="1" <?php if ($mont == 1) {
                                                                         echo ('selected');
                                                                     } ?>>Enero</option>
@@ -371,6 +409,7 @@ class admin_VI
                                 </thead>
                                 <tbody class="click">
                                     <?php
+                                    $printed=array(0=>'mes');
                                     foreach ($list as $saving) {
                                         $valor = $saving->saving_value;
                                         $fecha = $saving->saving_date;
@@ -415,10 +454,26 @@ class admin_VI
                                                 $mes = "Diciembre";
                                                 break;
                                         }
+                                        $search=$mes." ".$ano;
+                                        if(in_array($search, $printed))
+                                        {
+                                            continue;
+                                        }
+                                        array_push($printed, $search);
+                                        if($ano=='2023' && $valor<15000)
+                                        {
+                                            foreach ($list as $saving2)
+                                            {
+                                                $fechaPago2 = $saving2->saving_month;
+                                                if(($fechaPago===$fechaPago2)&&($saving2->saving_id!=$saving->saving_id)){
+                                                    $valor=$valor+$saving2->saving_value;
+                                                }
+                                            }
+                                        }
                                     ?>
                                         <tr class="modal-trigger" data-target="modal<?php echo ($listcant) ?>">
                                             <td><?php echo ($mes) ?> <?php echo ($ano) ?></td>
-                                            <td>$ <?php echo ($valor) ?></td>
+                                            <td><?php echo $fmt->formatCurrency($valor, "COP"); ?></td>
                                             <td><?php echo ($fecha) ?></td>
                                         </tr>
                                     <?php
@@ -437,6 +492,7 @@ class admin_VI
 
                     <?php
                     $listcant = 0;
+                    $printed=array(0=>'mes');
                     foreach ($list as $saving) {
                         $codigo = $saving->saving_id;
                         $valor = $saving->saving_value;
@@ -485,6 +541,97 @@ class admin_VI
                                 $mes = "Diciembre";
                                 break;
                         }
+                        $search=$mes." ".$ano;
+                        if(in_array($search, $printed))
+                        {
+                            continue;
+                        }
+                        array_push($printed, $search);
+                        if($ano=='2023' && $valor<15000)
+                        {
+                            $modal="<div id='modal".$listcant."' class='modal brtc1'>
+                                    <div class='modal-content'>
+                                        <h5>Informaci&oacuten de aporte (Este aporte contiene pagos parciales)</h5>
+                                        <hr size='2px' color='black' />
+                                        <h6><b>Código:</b> ".$codigo."</h6>
+                                        <h6><b>Aportado por:</b> ".$data[0]->pers_name." ".$data[0]->pers_lastname."</h6>
+                                        <h6><b>Mes pagado:</b> ".$mes." ".$ano."</h6>
+                                        <h6><b>Valor:</b> ".$fmt->formatCurrency($valor, "COP")."</h6>
+                                        <h6><b>Descripci&oacuten:</b> ".$descripcion."</h6>
+                                        <h6><b>Fecha:</b> ".$fecha."</h6>
+                                        <h6><b>Registrado por:</b> ".$registrador."</h6>
+                                        <h6><b>Recibido por:</b> ".$treasur."</h6>
+                                        <hr size='2px' color='black' />";
+                            foreach ($list as $saving2)
+                            {
+                                $fechaPago2 = $saving2->saving_month;
+                                if(($fechaPago===$fechaPago2)&&($saving2->saving_id!=$saving->saving_id)){
+                                    $codigo = $saving2->saving_id;
+                                    $valor = $saving2->saving_value;
+                                    $fecha = $saving2->saving_date;
+                                    $descripcion = $saving2->saving_description;
+                                    $registrador = $saving2->saving_register;
+                                    $treasur = $saving2->saving_treasur;
+                                    $fechaPago = $saving2->saving_month;
+                                    $ano = substr($fechaPago, 0, 4);
+                                    $mes = substr($fechaPago, 5, 2);
+                                    switch ($mes) {
+                                        case '01':
+                                            $mes = "Enero";
+                                            break;
+                                        case '02':
+                                            $mes = "Febrero";
+                                            break;
+                                        case '03':
+                                            $mes = "Marzo";
+                                            break;
+                                        case '04':
+                                            $mes = "Abril";
+                                            break;
+                                        case '05':
+                                            $mes = "Mayo";
+                                            break;
+                                        case '06':
+                                            $mes = "Junio";
+                                            break;
+                                        case '07':
+                                            $mes = "Julio";
+                                            break;
+                                        case '08':
+                                            $mes = "Agosto";
+                                            break;
+                                        case '09':
+                                            $mes = "Septimebre";
+                                            break;
+                                        case '10':
+                                            $mes = "Octubre";
+                                            break;
+                                        case '11':
+                                            $mes = "Noviembre";
+                                            break;
+                                        case '12':
+                                            $mes = "Diciembre";
+                                            break;
+                                    }
+                                    $modal=$modal."<h6><b>Código:</b> ".$codigo."</h6>
+                                    <h6><b>Aportado por:</b> ".$data[0]->pers_name." ".$data[0]->pers_lastname."</h6>
+                                    <h6><b>Mes pagado:</b> ".$mes." ".$ano."</h6>
+                                    <h6><b>Valor:</b> ".$fmt->formatCurrency($valor, "COP")."</h6>
+                                    <h6><b>Descripci&oacuten:</b> ".$descripcion."</h6>
+                                    <h6><b>Fecha:</b> ".$fecha."</h6>
+                                    <h6><b>Registrado por:</b> ".$registrador."</h6>
+                                    <h6><b>Recibido por:</b> ".$treasur."</h6>
+                                    <hr size='2px' color='black' />";
+                                }
+                            }
+                            $modal=$modal."</div>
+                            <div class='modal-footer'>
+                                <a class='modal-close waves-effect waves-light btn light-blue darken-2 '>Aceptar</a>
+                            </div>
+                        </div>";
+                        echo $modal;
+                        continue;
+                        }
                     ?>
                         <div id="modal<?php echo ($listcant) ?>" class="modal brtc1">
                             <div class="modal-content">
@@ -492,7 +639,7 @@ class admin_VI
                                 <h6><b>Código:</b> <?php echo ($codigo) ?></h6>
                                 <h6><b>Aportado por:</b> <?php echo ($data[0]->pers_name) ?> <?php echo ($data[0]->pers_lastname) ?></h6>
                                 <h6><b>Mes pagado:</b> <?php echo ($mes) ?> <?php echo ($ano) ?></h6>
-                                <h6><b>Valor:</b> <?php echo ($valor) ?></h6>
+                                <h6><b>Valor:</b> <?php echo $fmt->formatCurrency($valor, "COP"); ?></h6>
                                 <h6><b>Descripci&oacuten:</b> <?php echo ($descripcion) ?></h6>
                                 <h6><b>Fecha:</b> <?php echo ($fecha) ?></h6>
                                 <h6><b>Registrado por:</b> <?php echo ($registrador) ?></h6>
@@ -1313,34 +1460,108 @@ class admin_VI
 
         require_once 'model/savingtotal_MO.php';
         require_once 'model/credit_MO.php';
+        require_once 'model/interest_MO.php';
+        require_once 'model/fund_MO.php';
+        require_once 'model/donations_MO.php';
+        require_once 'model/assembly_MO.php';
+        require_once 'model/return_MO.php';
 
         $savingtotal_MO=new savingtotal_MO($conexion);
         $credit_MO=new credit_MO($conexion);
+        $interest_MO=new interest_MO($conexion);
+        $fund_MO=new fund_MO($conexion);
+        $donations_MO=new donations_MO($conexion);
+        $return_MO=new return_MO($conexion);
+        $assembly_MO=new assembly_MO($conexion);
 
+        $currentDay=strtotime(date('Y-m-d'));
+        $year=date('Y',$currentDay);
+
+        $existsInterest=$interest_MO->consultInterestWhitYear($year);
         $aportes=$savingtotal_MO->consultTotalSavingTotal();
         $creditData=$credit_MO->consultCreditInfPayd();
+        $excedentes=$donations_MO->consultDonationsForCredits();
+        $donations=$donations_MO->consultDonationsForPartners();
+        $fondodatos=$fund_MO->consultFund();
 
         $totalaporte=0;
         $interes=0;
         $mora=0;
         $surplus=0;
+        $surplus_ingreso=0;
+        $surplus_gasto=0;
         $capital_debt=0;
         $capital_payd=0;
+        $retorno=0;
+        $asamblea=0;
+        $fondo=0;
+        $fondo_ingreso=0;
+        $fondo_gasto=0;
+        $donations_value=0;
+        $donations_value_gasto=0;
+        $donations_value_ingreso=0;
+
         foreach($aportes as $aporte)
         {
             $totalaporte=$totalaporte+$aporte->sato_value;
         }
         foreach($creditData as $credit)
         {
-            $interes=$interes+$credit->credit_interest_payd;
-            $mora=$mora+$credit->credit_arrears_collected;
-            $surplus=$surplus+$credit->credit_surplus_collected;
             $capital_debt=$capital_debt+$credit->credit_capital_debt;
             $capital_payd=$capital_payd+$credit->credit_capital_payd;
         }
-
+        foreach($excedentes as $excedente)
+        {
+            if($excedente->donations_type=='i')
+            {
+                $surplus_ingreso=$surplus_ingreso+$excedente->donations_value;
+            }
+            else
+            {
+                $surplus_gasto=$surplus_gasto+$excedente->donations_value;
+            }
+        }
+        if($donations)
+        {
+            foreach($donations as $donacion)
+            {
+                if($donacion->donations_type=='i')
+                {
+                    $donations_value_ingreso=$donations_value_ingreso+$donacion->donations_value;
+                }
+                else
+                {
+                    $donations_value_gasto=$donations_value_gasto+$donacion->donations_value;
+                }
+            }
+        }
+        if($existsInterest)
+        {
+            $interes=$existsInterest[0]->interest_value_interest;
+            $mora=$existsInterest[0]->interest_value_arrears;
+            $retorno=$return_MO->consultReturnWhitYear($year);
+            $retorno=$retorno[0]->return_value;
+            $asamblea=$assembly_MO->consultAssemblyWhitYear($year);
+            $asamblea=$asamblea[0]->assembly_value;
+            
+            
+        }
+        foreach($fondodatos as $fund)
+        {
+            if($fund->fund_type=='i')
+            {
+                $fondo_ingreso=$fondo_ingreso+$fund->fund_value;
+            }
+            else
+            {
+                $fondo_gasto=$fondo_gasto+$fund->fund_value;
+            }
+        }
+        $fondo=$fondo_ingreso-$fondo_gasto;
+        $surplus=$surplus_ingreso-$surplus_gasto;
+        $donations_value=$donations_value_ingreso-$donations_value_gasto;
         $capital=$capital_debt-$capital_payd;
-        $cartera=$totalaporte+$interes+$mora+$surplus;
+        $cartera=$totalaporte+$fondo+$retorno+$asamblea+$surplus+$donations_value;
         $disponible=$cartera-$capital;
 
         $fmt = new NumberFormatter( 'es_CO', NumberFormatter::CURRENCY );
@@ -1353,43 +1574,67 @@ class admin_VI
                 <div class="col s12 card-money  card-panel brtc1">
                     <div class="row no-marginBottom">
                         <div class="col s12">
-                            <div class=" click card-money card-panel teal darken-3 brtc1">
+                            <div class=" click card-money card-panel  card-wallet teal darken-3 brtc1">
                                 <label for="deuda" class="white-text creditLabel">Total en cartera:</label>
                                 <h3 id="deuda" class="h6-cant white-text"><?php  echo $fmt->formatCurrency($cartera, "COP");?></h3>
                             </div>
                         </div>
                         <div class="col s12 m6">
-                            <div class=" click card-money card-panel  green darken-1 brtc1">
+                            <div class=" click card-money card-panel  card-wallet green darken-1 brtc1">
                                 <label for="deuda" class="white-text creditLabel">Total disponible:</label>
                                 <h3 id="deuda" class="h6-cant white-text"><?php  echo $fmt->formatCurrency($disponible, "COP");?></h3>
                             </div>
                         </div>
                         <div class="col s12 m6">
-                            <div class=" click card-money card-panel  lime darken-2 brtc1">
+                            <div class=" click card-money card-panel  card-wallet lime darken-2 brtc1">
                                 <label for="deuda" class="white-text creditLabel">Total aportes:</label>
                                 <h3 id="deuda" class="h6-cant white-text"><?php  echo $fmt->formatCurrency($totalaporte, "COP");?></h3>
                             </div>
                         </div>
                         <div class="col s12 m4">
-                            <div class=" click card-money card-panel light-blue darken-3 brtc1">
+                            <div class=" click card-money card-panel card-wallet light-blue darken-3 brtc1">
                                 <label for="deuda" class="white-text creditLabel">Total intereses:</label>
                                 <h3 id="deuda" class="h6-cant white-text"><?php  echo $fmt->formatCurrency($interes, "COP");?></h3>
                             </div>
                         </div>
                         <div class="col s12 m4">
-                            <div class=" click card-money card-panel light-blue darken-3 brtc1">
+                            <div class=" click card-money card-panel card-wallet light-blue darken-3 brtc1">
                                 <label for="deuda" class="white-text creditLabel">Total mora:</label>
                                 <h3 id="deuda" class="h6-cant white-text"><?php  echo $fmt->formatCurrency($mora, "COP");?></h3>
                             </div>
                         </div>
                         <div class="col s12 m4">
-                            <div class=" click card-money card-panel light-blue darken-3 brtc1">
+                            <div class=" click card-money card-panel card-wallet light-blue darken-3 brtc1">
                                 <label for="deuda" class="white-text creditLabel">Total excedentes:</label>
                                 <h3 id="deuda" class="h6-cant white-text"><?php  echo $fmt->formatCurrency($surplus, "COP");?></h3>
                             </div>
                         </div>
+                        <div class="col s12 m4">
+                            <div class=" click card-money card-panel card-wallet light-blue darken-3 brtc1">
+                                <label for="deuda" class="white-text creditLabel">Retorno a los socios:</label>
+                                <h3 id="deuda" class="h6-cant white-text"><?php  echo $fmt->formatCurrency($retorno, "COP");?></h3>
+                            </div>
+                        </div>
+                        <div class="col s12 m4">
+                            <div class=" click card-money card-panel card-wallet light-blue darken-3 brtc1">
+                                <label for="deuda" class="white-text creditLabel">Asamblea:</label>
+                                <h3 id="deuda" class="h6-cant white-text"><?php  echo $fmt->formatCurrency($asamblea, "COP");?></h3>
+                            </div>
+                        </div>
+                        <div class="col s12 m4">
+                            <div class=" click card-money card-panel card-wallet light-blue darken-3 brtc1">
+                                <label for="deuda" class="white-text creditLabel">Fondo:</label>
+                                <h3 id="deuda" class="h6-cant white-text"><?php  echo $fmt->formatCurrency($fondo, "COP");?></h3>
+                            </div>
+                        </div>
                         <div class="col s12">
-                            <div class=" click card-money card-panel red darken-2 brtc1">
+                            <div class=" click card-money card-panel card-wallet cyan darken-2 brtc1">
+                                <label for="deuda" class="white-text creditLabel">Total donaciones:</label>
+                                <h3 id="deuda" class="h6-cant white-text"><?php  echo $fmt->formatCurrency($donations_value, "COP");?></h3>
+                            </div>
+                        </div>
+                        <div class="col s12">
+                            <div class=" click card-money card-panel card-wallet red darken-2 brtc1">
                                 <label for="deuda" class="white-text creditLabel">Total prestado:</label>
                                 <h3 id="deuda" class="h6-cant white-text"><?php  echo $fmt->formatCurrency($capital, "COP");?></h3>
                             </div>
@@ -1399,6 +1644,166 @@ class admin_VI
             </div>
         </div>
         <?php
+    }
+    function donations()
+    {
+        if (isset($_SESSION['pers_id'])) 
+        {
+            $conexion = new conexion("sel");
+
+            require_once "model/roleMenuPermit_MO.php";
+            require_once "model/userRole_MO.php";
+
+            $userRole = new userRole_MO($conexion);
+            $roleMenuPermit_MO = new roleMenuPermit_MO($conexion);
+
+
+            $rol = $userRole->consultRole($_SESSION['pers_id']);
+            $permit = $roleMenuPermit_MO->consultWriteRegisterSaving($rol[0]->role_id);
+            $write = false;
+            $read = false;
+            foreach ($permit as $permits) {
+                if ($permits->permit_id == '3') {
+                    $write = true;
+                }
+                if ($permits->permit_id == '2') {
+                    $read = true;
+                }
+            }
+            
+            if($read)
+            {
+                require_once 'model/donations_MO.php';
+
+                $donations_MO=new donations_MO($conexion);
+                
+                $excedentes=$donations_MO->consultDonationsForCredits();
+                $donations=$donations_MO->consultDonationsForPartners();
+
+                $surplus=0;
+                $surplus_ingreso=0;
+                $surplus_gasto=0;
+                $donations_value=0;
+                $donations_value_gasto=0;
+                $donations_value_ingreso=0;
+
+                foreach($excedentes as $excedente)
+                {
+                    if($excedente->donations_type=='i')
+                    {
+                        $surplus_ingreso=$surplus_ingreso+$excedente->donations_value;
+                    }
+                    else
+                    {
+                        $surplus_gasto=$surplus_gasto+$excedente->donations_value;
+                    }
+                }
+                if($donations)
+                {
+                    foreach($donations as $donacion)
+                    {
+                        if($donacion->donations_type=='i')
+                        {
+                            $donations_value_ingreso=$donations_value_ingreso+$donacion->donations_value;
+                        }
+                        else
+                        {
+                            $donations_value_gasto=$donations_value_gasto+$donacion->donations_value;
+                        }
+                    }
+                }
+                $surplus=$surplus_ingreso-$surplus_gasto;
+                $donations_value=$donations_value_ingreso-$donations_value_gasto;
+
+                $fmt = new NumberFormatter( 'es_CO', NumberFormatter::CURRENCY );
+                $fmt->setTextAttribute(NumberFormatter::CURRENCY_CODE, 'COP');
+                $fmt->setAttribute(NumberFormatter::FRACTION_DIGITS, 0);
+                ?>
+                <div class="container">
+                    <div class="row">
+                        <div class="col s12 m6">
+                            <div class=" click card-money card-panel card-wallet light-blue darken-3 brtc1">
+                                <label for="excedente" class="white-text creditLabel">Total excedentes:</label>
+                                <h3 id="excedente" class="h6-cant white-text"><?php  echo $fmt->formatCurrency($surplus, "COP");?></h3>
+                            </div>
+                        </div>
+                        <div class="col s12 m6">
+                            <div class=" click card-money card-panel card-wallet light-blue darken-3 brtc1">
+                                <label for="donacion" class="white-text creditLabel">Total donaciones:</label>
+                                <h3 id="donacion" class="h6-cant white-text"><?php  echo $fmt->formatCurrency($donations_value, "COP");?></h3>
+                            </div>
+                        </div>
+                    </div>
+                    <?php 
+                    if($write)
+                    {
+                        ?>
+                        <div class="col s12">
+                            <div class="card-panel brtc1">
+                                <h5>Ingreso</h5>
+                                <form id="aggIngresoDonacion">
+                                    <div class="row">
+                                        <div class="input-field col s12 m6">
+                                            <input id="names" name="names" type="text" class="autocomplete validate"  required>
+                                            <label for="names">Socio:</label>
+                                            
+                                        </div>
+                                        <div class="input-field col s12 m6">
+                                            <input id="valor" name="valor" type="number"  min="100" class="validate" step="50" required>
+                                            <label for="valor">Valor:</label>
+                                        </div>
+                                        <div class="input-field col s12 m12">
+                                            <textarea  id="conceptoIngreso" name="conceptoIngreso" class="materialize-textarea validate"  data-length="250" minlength="5" maxlength="250" onchange="mensaje()" required></textarea>
+                                            <label for="conceptoIngreso">Concepto:</label>
+                                        </div>
+                                    </div>
+                                    <div class="right-align">
+                                        <button class=" btn  waves-effect waves-light light-blue darken-2" type="button" id="btnPagoDonacion" name="action" onclick="donationPartner()">Registrar
+                                            <i lang="en" class="material-icons right">save</i>
+                                        </button>
+                                        <br>
+                                    </div>
+                                    
+                                </form>
+                            </div>
+                        </div>
+                        <div class="col s12">
+                            <div class="card-panel brtc1">
+                                <h5>Gasto</h5>
+                            </div>
+                        </div>
+                        <?php
+                    }
+                    ?>
+                    <div class="col s12">
+                        <div class="card-panel brtc1">
+                            <h5>Historial de aportes</h5>
+                            <table class="highlight responsive-table">
+                                <thead>
+                                    <th>Mes pagado</th>
+                                    <th>Valor</th>
+                                    <th>Fecha</th>
+                                </thead>
+                                <tbody class="click"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <?php
+                if($write)
+                {
+                    ?>
+                    <script src="dist/js/autocompleteNames.js"></script>
+                    <script src="dist/js/savingDonationPartner.js"></script>
+                    <?php
+                } 
+                ?>
+                <script src="dist/js/CharacterCounter.js"></script>
+                <script src="dist/js/materialize.min.js"></script>
+                <?php
+            }
+            
+        }
     }
 }
 ?>

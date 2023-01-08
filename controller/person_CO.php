@@ -203,5 +203,33 @@
                 }
             }
         }
+        function consultNames()
+        {
+            $conexion=new conexion("sel");
+            $person_MO= new person_MO($conexion);
+            $data=$person_MO->listPersonName();
+            $names=[];
+            $i=0;
+            foreach($data as $name)
+            {
+                $names[$i]=$name->pers_name." ".$name->pers_lastname;
+                $i++;
+            }
+            exit(json_encode($names));
+        }
+        function consultId()
+        {
+            $conexion=new conexion("sel");
+            $person_MO= new person_MO($conexion);
+            $data=$person_MO->listPersonId();
+            $ids=[];
+            $i=0;
+            foreach($data as $id)
+            {
+                $ids[$i]=$id->pers_id;
+                $i++;
+            }
+            exit(json_encode($ids));
+        }
     }
 ?>

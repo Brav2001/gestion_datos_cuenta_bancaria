@@ -13,7 +13,7 @@ function pagoAporte(pers_id)
     botona.disabled=true;
     botonb.disabled=true;
     var valor=document.getElementById("valor").value;
-    if(valor<10000 || valor>10000)
+    if(valor<100 || valor>15000)
     {
         M.toast({html: 'El campo VALOR NO es V&AacuteLIDO '});
         boton.disabled=false;
@@ -36,7 +36,7 @@ function pagoAporte(pers_id)
         if(mes=='1' || mes=='2' || mes=='3' || mes=='4' || mes=='5' || mes=='6' || mes=='7' || mes=='8' || mes=='9' || mes=='10' || mes=='11' || mes=='12' )
         {
             var ano=document.getElementById("ano").value;
-            if(ano=='2021' || ano=='2022' || ano=='2023' || ano=='2024' || ano=='2025')
+            if( ano=='2022' || ano=='2023' || ano=='2024' || ano=='2025' ||ano=='2026')
             {
             Swal.fire({
                 title: '¿Está seguro?',
@@ -51,6 +51,8 @@ function pagoAporte(pers_id)
                 if (result.isConfirmed) {
                 var data = new FormData(document.getElementById('formpagoabono'));
                 data.append('asociado', pers_id);
+                data.append('month', mes);
+                data.append('year', ano);
                 fetch('saving_CO/addSaving', {
                     method: 'POST',
                     body: data
