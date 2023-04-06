@@ -1,0 +1,5 @@
+# Ignora la carpeta backups
+backups
+
+# Ignora la carpeta pruebas
+pruebas
