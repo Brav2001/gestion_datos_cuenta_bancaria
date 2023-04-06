@@ -1,4 +1,5 @@
 <?php
+    //Crear cuotas de creditos viejos
     require_once "library/const.php";
     require_once "library/connect.php";
     require_once "model/credit_MO.php";

@@ -1,5 +1,8 @@
-# Ignora la carpeta backups
-backups
+#carpeta pruebas
+pruebas/
 
-# Ignora la carpeta pruebas
-pruebas
+#carpeta backups
+backups/
+
+#archivo const.php
+library/const.php

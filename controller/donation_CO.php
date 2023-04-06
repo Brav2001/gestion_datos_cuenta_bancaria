@@ -3,10 +3,10 @@
     {
         function savingDonationForPartner()
         {
-            $pers_id=$_POST['id'];
-            $pers_name=$_POST['names'];
-            $value=$_POST['valor'];
-            $concepto=$_POST['conceptoIngreso'];
+            $pers_id=htmlentities($_POST['id'],ENT_QUOTES);
+            $pers_name=htmlentities($_POST['names'],ENT_QUOTES);
+            $value=htmlentities($_POST['valor'],ENT_QUOTES);
+            $concepto=htmlentities($_POST['conceptoIngreso'],ENT_QUOTES);
 
             if( !$pers_id || !$pers_name || !$value || !$concepto || $value<100)
             {

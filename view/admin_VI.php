@@ -1239,6 +1239,15 @@ class admin_VI
                             <label for="fechaCorte">Fecha Corte:</label>
                             <h4 id="fechaCorte" class="dataCredit"><?php  echo $result[0]->credit_date_cut_first?></h4>
                         </div>
+                        <div class="input-field col s12 m3">
+                            <select>
+                                <option value="" disabled selected>Choose your option</option>
+                                <option value="1">Option 1</option>
+                                <option value="2">Option 2</option>
+                                <option value="3">Option 3</option>
+                            </select>
+                            <label>Comprobante:</label>
+                        </div>
                     </div>
                     <?php
                     if($payment)
@@ -1450,6 +1459,7 @@ class admin_VI
             }
             ?>
             <script src="dist/js/modal.js"></script>
+            <script src="dist/js/sideini.js"></script>
 
             <?php
         }
@@ -1679,6 +1689,8 @@ class admin_VI
                 
                 $excedentes=$donations_MO->consultDonationsForCredits();
                 $donations=$donations_MO->consultDonationsForPartners();
+                $allDonationsSurplus=$donations_MO->consultAllDonationsSurplus();
+                $allDonationsDonations=$donations_MO->consultAllDonationsDonations();
 
                 $surplus=0;
                 $surplus_ingreso=0;
@@ -1777,14 +1789,115 @@ class admin_VI
                     ?>
                     <div class="col s12">
                         <div class="card-panel brtc1">
-                            <h5>Historial de aportes</h5>
+                            <h5>Movimientos Excedentes</h5>
                             <table class="highlight responsive-table">
                                 <thead>
-                                    <th>Mes pagado</th>
+                                    <th>Responsable</th>
+                                    <th>Concepto</th>
                                     <th>Valor</th>
                                     <th>Fecha</th>
                                 </thead>
-                                <tbody class="click"></tbody>
+                                <tbody class="click">
+                                    <?php
+                                    foreach($allDonationsSurplus as $donates)
+                                    {
+                                        ?>
+                                        <tr class="modal-trigger" data-target="modal<?php echo ($donates->donations_id) ?>">
+                                            <?php 
+                                            if($donates->person_name==='Excedente de créditos')
+                                            {
+                                                ?>
+                                                <td><?php echo $donates->person_name?> <?php echo $donates->donations_year?></td>
+                                                <?php
+                                            }
+                                            else
+                                            {
+                                                ?>
+                                                <td><?php echo $donates->person_name?></td>
+                                                <?php
+                                            }
+                                            ?>
+                                            <td><?php echo $donates->donations_concept?></td>
+                                            <?php 
+                                            if($donates->donations_type==='i')
+                                            {
+                                                ?>
+                                                <td class="green-text text-darken-2">+ <?php echo $fmt->formatCurrency($donates->donations_value,'COP')?></td>
+                                                <?php
+                                            }
+                                            else
+                                            {
+                                                ?>
+                                                <td class="red-text text-darken-2">- <?php echo $fmt->formatCurrency($donates->donations_value,'COP')?></td>
+                                                <?php
+                                            }
+                                            ?>
+                                            <td><?php echo $donates->updated_at?></td>
+                                        </tr>
+                                        <?php
+                                    } 
+                                    ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <?php
+                    foreach($allDonationsSurplus as $donates)
+                    {
+                        ?>
+                        <div id="modal<?php echo ($donates->donations_id) ?>" class="modal brtc1">
+                            <div class="modal-content">
+                                <h5>Informaci&oacuten de donación</h5>
+                                <h6><b>Responsable:</b> <?php echo ($data[0]->pers_name) ?> <?php echo ($data[0]->pers_lastname) ?></h6>
+                                <h6><b>Valor:</b> <?php echo $fmt->formatCurrency($valor, "COP"); ?></h6>
+                                <h6><b>Concepto:</b> <?php echo ($descripcion) ?></h6>
+                                <h6><b>Fecha:</b> <?php echo ($fecha) ?></h6>
+                            </div>
+                            <div class="modal-footer">
+                                <a class="modal-close waves-effect waves-light btn light-blue darken-2 ">Aceptar</a>
+                            </div>
+                        </div>
+                        <?php
+                    }
+                    ?>
+                    <div class="col s12">
+                        <div class="card-panel brtc1">
+                            <h5>Movimientos Donaciones</h5>
+                            <table class="highlight responsive-table">
+                                <thead>
+                                    <th>Responsable</th>
+                                    <th>Concepto</th>
+                                    <th>Valor</th>
+                                    <th>Fecha</th>
+                                </thead>
+                                <tbody class="click">
+                                    <?php
+                                    foreach($allDonationsDonations as $donates)
+                                    {
+                                        ?>
+                                        <tr class="modal-trigger" data-target="modal<?php echo ($donates->donations_id) ?>">
+                                            <td><?php echo $donates->person_name?></td>
+                                            <td><?php echo $donates->donations_concept?></td>
+                                            <?php 
+                                            if($donates->donations_type==='i')
+                                            {
+                                                ?>
+                                                <td class="green-text text-darken-2">+ <?php echo $fmt->formatCurrency($donates->donations_value,'COP')?></td>
+                                                <?php
+                                            }
+                                            else
+                                            {
+                                                ?>
+                                                <td class="red-text text-darken-2">- <?php echo $fmt->formatCurrency($donates->donations_value,'COP')?></td>
+                                                <?php
+                                            }
+                                            ?>
+                                            <td><?php echo $donates->created_at?></td>
+                                        </tr>
+                                        <?php
+                                    } 
+                                    ?>
+                                </tbody>
                             </table>
                         </div>
                     </div>

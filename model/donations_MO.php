@@ -44,5 +44,17 @@
             $this->connect->consultar($sql);
             return $this->connect->extraerRegistro();
         }
+        function consultAllDonationsSurplus()
+        {
+            $sql="SELECT * FROM `donations` WHERE `pers_id` IS NULL ORDER BY `donations_id` DESC;";
+            $this->connect->consultar($sql);
+            return $this->connect->extraerRegistro();
+        }
+        function consultAllDonationsDonations()
+        {
+            $sql="SELECT * FROM `donations` WHERE `pers_id` IS NOT NULL ORDER BY `donations_id` DESC;";
+            $this->connect->consultar($sql);
+            return $this->connect->extraerRegistro();
+        }
     }
 ?>
